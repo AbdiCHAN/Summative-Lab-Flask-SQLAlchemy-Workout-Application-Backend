@@ -1,0 +1,332 @@
+openapi: 3.0.0
+info:
+  title: Workout Tracking API
+  description: A RESTful API for tracking workouts, exercises, and workout sessions
+  version: 1.0.0
+  contact:
+    name: Workout API Team
+    email: support@workoutapi.com
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Development server
+
+paths:
+  /exercises:
+    get:
+      summary: Get all exercises
+      description: Returns a list of all exercises
+      responses:
+        '200':
+          description: A list of exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exercise'
+
+    post:
+      summary: Create a new exercise
+      description: Creates a new exercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseCreate'
+      responses:
+        '201':
+          description: Exercise created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+
+  /exercises/{exerciseId}:
+    get:
+      summary: Get a single exercise
+      description: Returns a single exercise by ID
+      parameters:
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested exercise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+        '404':
+          description: Exercise not found
+
+    put:
+      summary: Update an exercise
+      description: Updates an existing exercise
+      parameters:
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseCreate'
+      responses:
+        '200':
+          description: Exercise updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+        '404':
+          description: Exercise not found
+
+    delete:
+      summary: Delete an exercise
+      description: Deletes an exercise by ID
+      parameters:
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Exercise deleted successfully
+        '404':
+          description: Exercise not found
+
+  /workouts:
+    get:
+      summary: Get all workouts
+      description: Returns a list of all workouts
+      responses:
+        '200':
+          description: A list of workouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workout'
+
+    post:
+      summary: Create a new workout
+      description: Creates a new workout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutCreate'
+      responses:
+        '201':
+          description: Workout created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+
+  /workouts/{workoutId}:
+    get:
+      summary: Get a single workout
+      description: Returns a single workout by ID
+      parameters:
+        - name: workoutId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested workout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+        '404':
+          description: Workout not found
+
+    put:
+      summary: Update a workout
+      description: Updates an existing workout
+      parameters:
+        - name: workoutId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutCreate'
+      responses:
+        '200':
+          description: Workout updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+        '404':
+          description: Workout not found
+
+  /workouts/{workoutId}/exercises/{exerciseId}/workout_exercises:
+    post:
+      summary: Add exercise to workout
+      description: Adds an exercise to a workout with optional details
+      parameters:
+        - name: workoutId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutExerciseCreate'
+      responses:
+        '201':
+          description: Exercise added to workout successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutExercise'
+
+components:
+  schemas:
+    Exercise:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Exercise ID
+        name:
+          type: string
+          description: Exercise name
+        category:
+          type: string
+          description: Exercise category
+        equipment_needed:
+          type: boolean
+          description: Whether equipment is needed
+      required:
+        - id
+        - name
+        - category
+        - equipment_needed
+
+    ExerciseCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Exercise name
+        category:
+          type: string
+          description: Exercise category
+        equipment_needed:
+          type: boolean
+          description: Whether equipment is needed
+      required:
+        - name
+        - category
+        - equipment_needed
+
+    Workout:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Workout ID
+        date:
+          type: string
+          format: date
+          description: Workout date
+        duration_minutes:
+          type: integer
+          description: Workout duration in minutes
+        notes:
+          type: string
+          description: Workout notes
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkoutExercise'
+      required:
+        - id
+        - date
+        - duration_minutes
+
+    WorkoutCreate:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: Workout date
+        duration_minutes:
+          type: integer
+          description: Workout duration in minutes
+        notes:
+          type: string
+          description: Workout notes
+      required:
+        - date
+        - duration_minutes
+
+    WorkoutExercise:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: WorkoutExercise ID
+        workout_id:
+          type: integer
+          description: Workout ID
+        exercise_id:
+          type: integer
+          description: Exercise ID
+        reps:
+          type: integer
+          description: Number of repetitions
+        sets:
+          type: integer
+          description: Number of sets
+        duration_seconds:
+          type: integer
+          description: Duration in seconds
+        exercise:
+          $ref: '#/components/schemas/Exercise'
+      required:
+        - id
+        - workout_id
+        - exercise_id
+
+    WorkoutExerciseCreate:
+      type: object
+      properties:
+        reps:
+          type: integer
+          description: Number of repetitions
+        sets:
+          type: integer
+          description: Number of sets
+        duration_seconds:
+          type: integer
+          description: Duration in seconds
