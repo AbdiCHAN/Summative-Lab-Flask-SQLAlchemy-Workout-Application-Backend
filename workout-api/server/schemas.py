@@ -14,6 +14,12 @@ class ExerciseSchema(SQLAlchemyAutoSchema):
     category = fields.Str(required=True)
     equipment_needed = fields.Bool(required=True)
 
+
+class ExerciseCreateSchema(Schema):
+    name = fields.Str(required=True)
+    category = fields.Str(required=True)
+    equipment_needed = fields.Bool(required=True)
+
     @validates('name')
     def validate_name(self, value):
         if not value or len(value.strip()) == 0:
@@ -41,21 +47,6 @@ class WorkoutExerciseSchema(SQLAlchemyAutoSchema):
     duration_seconds = fields.Int(allow_none=True)
 
     exercise = fields.Nested(ExerciseSchema, dump_only=True, exclude=('equipment_needed',))
-
-    @validates('reps')
-    def validate_reps(self, value):
-        if value is not None and value < 0:
-            raise ValidationError("Reps must be non-negative")
-
-    @validates('sets')
-    def validate_sets(self, value):
-        if value is not None and value < 0:
-            raise ValidationError("Sets must be non-negative")
-
-    @validates('duration_seconds')
-    def validate_duration_seconds(self, value):
-        if value is not None and value < 0:
-            raise ValidationError("Duration seconds must be non-negative")
 
 
 class WorkoutExerciseCreateSchema(Schema):
@@ -91,18 +82,6 @@ class WorkoutSchema(SQLAlchemyAutoSchema):
     notes = fields.Str(allow_none=True)
 
     exercises = fields.List(fields.Nested(WorkoutExerciseSchema), dump_only=True)
-
-    @validates('duration_minutes')
-    def validate_duration_minutes(self, value):
-        if value is None:
-            raise ValidationError("Duration minutes is required")
-        if value <= 0:
-            raise ValidationError("Duration minutes must be greater than 0")
-
-    @validates('date')
-    def validate_date(self, value):
-        if value is None:
-            raise ValidationError("Date is required")
 
 
 class WorkoutCreateSchema(Schema):

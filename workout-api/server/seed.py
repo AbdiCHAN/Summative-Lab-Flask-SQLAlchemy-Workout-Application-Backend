@@ -1,6 +1,9 @@
 from datetime import date, timedelta
-from .app import app, db
-from .models import Exercise, Workout, WorkoutExercise
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from server.app import app, db
+from server.models import Exercise, Workout, WorkoutExercise
 
 
 def seed_database():

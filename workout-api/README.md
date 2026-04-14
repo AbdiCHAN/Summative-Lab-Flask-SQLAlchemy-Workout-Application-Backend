@@ -68,7 +68,7 @@ python server/seed.py
 Start the Flask development server:
 
 ```bash
-flask run
+FLASK_APP=server.app flask run
 ```
 
 The API will be available at `http://127.0.0.1:5000`

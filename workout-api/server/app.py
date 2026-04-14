@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
-from datetime import date
+from datetime import date as date_type
 from .models import db, Exercise, Workout, WorkoutExercise
 from .schemas import (
     ExerciseSchema,
+    ExerciseCreateSchema,
     WorkoutSchema,
     WorkoutExerciseSchema,
     WorkoutCreateSchema,
@@ -19,6 +20,7 @@ migrate = Migrate(app, db)
 
 exercise_schema = ExerciseSchema()
 exercises_schema = ExerciseSchema(many=True)
+exercise_create_schema = ExerciseCreateSchema()
 workout_schema = WorkoutSchema()
 workouts_schema = WorkoutSchema(many=True)
 workout_exercise_schema = WorkoutExerciseSchema()
@@ -61,12 +63,16 @@ def create_exercise():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
-    errors = exercise_schema.validate(data)
+    errors = exercise_create_schema.validate(data)
     if errors:
         return jsonify({'error': 'Validation failed', 'errors': errors}), 400
 
     try:
-        exercise = exercise_schema.load(data)
+        exercise = Exercise(
+            name=data.get('name'),
+            category=data.get('category'),
+            equipment_needed=data.get('equipment_needed')
+        )
         db.session.add(exercise)
         db.session.commit()
         return jsonify(exercise_schema.dump(exercise)), 201
@@ -82,6 +88,9 @@ def delete_exercise(exercise_id):
         return jsonify({'error': 'Exercise not found'}), 404
 
     try:
+        # Delete associated workout_exercises first
+        for we in exercise.workouts:
+            db.session.delete(we)
         db.session.delete(exercise)
         db.session.commit()
         return jsonify({'message': 'Exercise deleted successfully'}), 200
@@ -161,7 +170,17 @@ def create_workout():
         return jsonify({'error': 'Validation failed', 'errors': errors}), 400
 
     try:
-        workout = workout_create_schema.load(data)
+        date_str = data.get('date')
+        if isinstance(date_str, str):
+            workout_date = date_type.fromisoformat(date_str)
+        else:
+            workout_date = date_str
+            
+        workout = Workout(
+            date=workout_date,
+            duration_minutes=data.get('duration_minutes'),
+            notes=data.get('notes')
+        )
         db.session.add(workout)
         db.session.commit()
         return jsonify(workout_schema.dump(workout)), 201
